@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/actionBarSize"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/primaryColor"
+    app:contentInsetEnd="0dp"
+    app:contentInsetStart="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/searchBooksToolbarTextLayout"
+            android:layout_width="0dp"
+            android:layout_height="53dp"
+            android:theme="@style/SearchBookField"
+            app:boxBackgroundColor="@color/primaryColor"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="19dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            app:endIconTint="@color/white"
+            app:startIconTint="@color/white">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/searchBooksToolbarEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/SearchBookEditText" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <FrameLayout
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/searchBooksToolbarFilterAppCompatImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_trailing" />
+
+            <View
+                android:id="@+id/searchBooksToolbarFilterActiveView"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_gravity="end"
+                android:background="@drawable/sh_oval"
+                android:backgroundTint="@color/orange"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </FrameLayout>
+
+    </LinearLayout>
+
+
+</com.google.android.material.appbar.MaterialToolbar>

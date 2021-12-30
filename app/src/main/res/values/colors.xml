@@ -3,5 +3,8 @@
     <color name="primaryColor">#009eff</color>
     <color name="primaryLightColor">#69bfff</color>
     <color name="primaryDarkColor">#0084eb</color>
-
+    <color name="white">#ffff</color>
+    <color name="orange">#FF8400</color>
+    <color name="textDark">#DE000000</color>
+    <color name="gray">#dedede</color>
 </resources>
