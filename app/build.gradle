@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -42,4 +44,12 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
 
     implementation 'com.github.kirich1409:viewbindingpropertydelegate:1.5.3'
+
+    implementation "com.google.dagger:hilt-android:2.38.1"
+    kapt "com.google.dagger:hilt-compiler:2.38.1"
+
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
 }
