@@ -47,7 +47,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
     }
 
     private fun performSearch(){
-        TODO()
+        viewModel.getBooksByParameter(binding.searchBooksToolbar.searchBooksToolbarEditText.text.toString())
     }
 
 }
