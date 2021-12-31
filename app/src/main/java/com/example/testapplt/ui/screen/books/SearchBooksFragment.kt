@@ -3,6 +3,7 @@ package com.example.testapplt.ui.screen.books
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -18,10 +19,11 @@ import com.example.testapplt.ui.utils.hide
 import com.example.testapplt.ui.utils.show
 import com.example.testapplt.ui.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@FlowPreview
 @AndroidEntryPoint
 class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
 
@@ -53,11 +55,25 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
                 }else
                     false
             }
+
+            addTextChangedListener {
+                viewModel.textFieldBeChanged(it.toString())
+            }
         }
 
         binding.searchBooksToolbar.searchBooksToolbarFilterAppCompatImageButton.setOnClickListener {
 
         }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.liveSearch
+                    .collectLatest { parameter ->
+                        viewModel.startSearch(parameter)
+                    }
+            }
+        }
+
     }
 
     private fun performSearch(){
