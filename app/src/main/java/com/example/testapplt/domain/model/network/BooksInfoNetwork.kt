@@ -11,6 +11,8 @@ class BooksInfoNetwork (
 
 @JsonClass(generateAdapter = true)
 class ItemsInfo(
+    @Json(name = "id")
+    val id : String,
     @Json(name = "volumeInfo")
     val volumeInfo : VolumeInfo,
 )
