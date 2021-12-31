@@ -1,14 +1,13 @@
-package com.example.testapplt.ui.screen
+package com.example.testapplt.ui.screen.books
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import com.example.testapplt.R
+import androidx.fragment.app.viewModels
+
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.example.testapplt.R
 import com.example.testapplt.databinding.FragmentSearchBooksBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,6 +19,8 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
     }
 
     private val binding: FragmentSearchBooksBinding by viewBinding()
+
+    private val viewModel: SearchBooksViewModel by viewModels()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
