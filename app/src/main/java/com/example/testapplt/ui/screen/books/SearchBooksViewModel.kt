@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.testapplt.domain.model.ErrorReason
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.domain.usecases.ListOfBooksUseCase
-import com.example.testapplt.ui.screen.SearchFiltersScreen
+import com.example.testapplt.ui.screen.Screens.searchFiltersScreen
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import ru.terrakok.cicerone.Router
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -20,6 +20,10 @@ class SearchBooksViewModel @Inject constructor(
     private val router : Router
 ): ViewModel() {
 
+    companion object{
+        private const val COUNT_ITEMS_FROM_BACKAND = 10
+    }
+
     private var getBooksRequest: Job? = null
 
     private val mutableBookList = MutableStateFlow<BooksListState>(BooksListState.Empty)
@@ -29,14 +33,18 @@ class SearchBooksViewModel @Inject constructor(
     val liveSearch = mutableLiveSearch.asSharedFlow()
 
     private var isLoadingNextBooks = false
-    private var isTextFiledEmpty = true
+
+    private var textFieldContent = ""
+
+    private val mutableSearchType = MutableStateFlow(SearchType.ALL)
+    val searchType: StateFlow<SearchType> = mutableSearchType.asStateFlow()
 
 
     sealed class BooksListState {
         object Empty : BooksListState()
         object NoConnection : BooksListState()
         class Error(val errorReason: ErrorReason) : BooksListState()
-        class BooksListSuccess(val booksInfo: List<BooksInfo>) : BooksListState()
+        class BooksListSuccess(val booksInfo: List<BooksInfo>, val isShowLoader: Boolean) : BooksListState()
     }
 
     fun setEmptyState(){
@@ -46,15 +54,14 @@ class SearchBooksViewModel @Inject constructor(
     }
 
     fun textFieldBeChanged(parameter: String){
+        textFieldContent = parameter
         when{
             parameter.isBlank() -> viewModelScope.launch {
                 mutableBookList.emit(BooksListState.Empty)
                 getBooksRequest?.cancel()
-                isTextFiledEmpty = true
             }
             else -> viewModelScope.launch {
                 mutableLiveSearch.emit(parameter)
-                isTextFiledEmpty = false
             }
         }
     }
@@ -66,10 +73,10 @@ class SearchBooksViewModel @Inject constructor(
 
 
     fun getBooksByParameter(parameter: String){
-        if (parameter.isBlank() || isTextFiledEmpty) return
+        if (parameter.isBlank() || textFieldContent.isBlank()) return
         getBooksRequest?.cancel()
         getBooksRequest = viewModelScope.launch {
-            listOfBooksUseCase.getBooks(parameter).process(
+            listOfBooksUseCase.getBooks(searchType.value.typeSignature, parameter).process(
                 {
                     when(it){
                         is ErrorReason.NetworkError -> launch {
@@ -82,8 +89,14 @@ class SearchBooksViewModel @Inject constructor(
                 },
                 {
                     it?.let { notNull ->
-                        launch {
-                            mutableBookList.emit(BooksListState.BooksListSuccess(notNull))
+                        if (notNull.size < COUNT_ITEMS_FROM_BACKAND) {
+                            launch {
+                                mutableBookList.emit(BooksListState.BooksListSuccess(notNull, false))
+                            }
+                        }else{
+                            launch {
+                                mutableBookList.emit(BooksListState.BooksListSuccess(notNull, true))
+                            }
                         }
                     }
                     if (it.isNullOrEmpty()){
@@ -117,7 +130,7 @@ class SearchBooksViewModel @Inject constructor(
 
 
         getBooksRequest = viewModelScope.launch {
-            listOfBooksUseCase.getBooks(parameter, currentList.size).process(
+            listOfBooksUseCase.getBooks(searchType.value.typeSignature, parameter, currentList.size).process(
                 {
                     when(it){
                         is ErrorReason.NetworkError -> launch {
@@ -133,9 +146,18 @@ class SearchBooksViewModel @Inject constructor(
                         launch {
                             currentList.addAll(it)
                             mutableBookList.emit(BooksListState.BooksListSuccess(
-                                ArrayList(LinkedHashSet(currentList))       // we must do it, because the backend has a bug, it sends duplicates
+                                ArrayList(LinkedHashSet(currentList)), // we must do it, because the backend has a bug, it sends duplicates
+                                it.isNotEmpty()
                             ))
-
+                        }
+                    } ?: run {
+                        launch {
+                            mutableBookList.emit(
+                                BooksListState.BooksListSuccess(
+                                    ArrayList(LinkedHashSet(currentList)), // we must do it, because the backend has a bug, it sends duplicates
+                                    false
+                                )
+                            )
                         }
                     }
                     isLoadingNextBooks = false
@@ -146,7 +168,13 @@ class SearchBooksViewModel @Inject constructor(
     }
 
     fun navigateToFilters(){
-        router.navigateTo(SearchFiltersScreen("None"))
+        router.setResultListener(RESULT_KEY) { data ->
+            viewModelScope.launch {
+                mutableSearchType.emit(data as SearchType)
+            }
+            getBooksByParameter(textFieldContent)
+        }
+        router.navigateTo(searchFiltersScreen(searchType.value))
     }
 
 }

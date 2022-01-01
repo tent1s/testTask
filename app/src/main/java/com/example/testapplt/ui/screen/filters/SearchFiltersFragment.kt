@@ -5,11 +5,11 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.testapplt.R
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.activity.addCallback
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.testapplt.databinding.FragmentSearchFiltersBinding
-import com.example.testapplt.ui.screen.books.SearchBooksViewModel
+import com.example.testapplt.ui.screen.books.SearchType
+import com.example.testapplt.ui.view.FilterView
 import kotlinx.coroutines.FlowPreview
 
 @FlowPreview
@@ -17,12 +17,12 @@ import kotlinx.coroutines.FlowPreview
 class SearchFiltersFragment : Fragment(R.layout.fragment_search_filters){
 
     companion object {
-        private const val EXTRA_NAME = "tcf_extra_name"
+        private const val SEARCH_TYPE = "SearchType"
 
-        fun getNewInstance(name: String?) =
+        fun getNewInstance(params: SearchType?) =
             SearchFiltersFragment().apply {
                 arguments = Bundle().apply {
-                    putString(EXTRA_NAME, name)
+                    putParcelable(SEARCH_TYPE, params)
                 }
             }
     }
@@ -31,14 +31,30 @@ class SearchFiltersFragment : Fragment(R.layout.fragment_search_filters){
 
     private val viewModel: SearchFiltersViewModel by viewModels()
 
+    private val filterViewToSearchType: List<Pair<FilterView, SearchType>>
+        get() = listOf(
+            binding.allSearchFiltersFilterView to SearchType.ALL,
+            binding.authorSearchFiltersFilterView to SearchType.AUTHOR,
+            binding.nameSearchFiltersFilterView to SearchType.NAME_VOLUME,
+            binding.subjectSearchFiltersFilterView to SearchType.SUBJECT,
+            binding.publisherSearchFiltersFilterView to SearchType.PUBLISHER,
+        )
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            viewModel.returnToBooksScreen()
-        }
+
         binding.searchFiltersMaterialToolbar.setNavigationOnClickListener {
-            viewModel.returnToBooksScreen()
+            viewModel.onBackClicked()
+        }
+
+        filterViewToSearchType.forEach { viewToSearchType ->
+            if (arguments?.getParcelable<SearchType>(SEARCH_TYPE) == viewToSearchType.second)
+                viewToSearchType.first.isActive = true
+            else
+                viewToSearchType.first.setOnClickListener {
+                    viewModel.sendNewType(viewToSearchType.second)
+                }
         }
     }
 }

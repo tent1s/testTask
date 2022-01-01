@@ -50,7 +50,7 @@
         app:text="@string/searchForAuthor" />
 
     <com.example.testapplt.ui.view.FilterView
-        android:id="@+id/NameSearchFiltersFilterView"
+        android:id="@+id/name_search_filters_filter_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,21 +59,21 @@
         app:text="@string/searchForName" />
 
     <com.example.testapplt.ui.view.FilterView
-        android:id="@+id/SubjectSearchFiltersFilterView"
+        android:id="@+id/subject_search_filters_filter_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/NameSearchFiltersFilterView"
+        app:layout_constraintTop_toBottomOf="@+id/name_search_filters_filter_view"
         app:text="@string/searchForSubject" />
 
     <com.example.testapplt.ui.view.FilterView
-        android:id="@+id/PublisherSearchFiltersFilterView"
+        android:id="@+id/publisher_search_filters_filter_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/SubjectSearchFiltersFilterView"
+        app:layout_constraintTop_toBottomOf="@+id/subject_search_filters_filter_view"
         app:text="@string/searchForPublisher" />
 
 

@@ -10,6 +10,6 @@ class ListOfBooksUseCase @Inject constructor(
     private val googleBookRepository: GoogleBookRepository)
 {
 
-    suspend fun getBooks(parameter: String, startIndex: Int = 0): Either<ErrorReason, List<BooksInfo>?> =
-        googleBookRepository.getBooks(parameter, startIndex)
+    suspend fun getBooks(searchParam: String, parameter: String, startIndex: Int = 0): Either<ErrorReason, List<BooksInfo>?> =
+        googleBookRepository.getBooks(searchParam, parameter, startIndex)
 }

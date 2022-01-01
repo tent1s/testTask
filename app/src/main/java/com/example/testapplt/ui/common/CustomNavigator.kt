@@ -4,31 +4,34 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.example.testapplt.MainActivity
 import com.example.testapplt.R
+import com.github.terrakok.cicerone.androidx.AppNavigator
+import com.github.terrakok.cicerone.androidx.FragmentScreen
 import kotlinx.coroutines.FlowPreview
-import ru.terrakok.cicerone.android.support.SupportAppNavigator
-import ru.terrakok.cicerone.commands.Command
+
 
 @FlowPreview
 class CustomNavigator(
     activity: MainActivity,
     containerID: Int
-): SupportAppNavigator(activity, containerID) {
+): AppNavigator(activity, containerID) {
+
 
     override fun setupFragmentTransaction(
-        command: Command,
+        screen: FragmentScreen,
+        fragmentTransaction: FragmentTransaction,
         currentFragment: Fragment?,
-        nextFragment: Fragment?,
-        fragmentTransaction: FragmentTransaction
+        nextFragment: Fragment
     ) {
         super.setupFragmentTransaction(
-            command, currentFragment, nextFragment,
+            screen,
             fragmentTransaction.setCustomAnimations(
                 R.anim.slide_in_left,
                 R.anim.slide_out_right,
                 R.anim.slide_in_right,
                 R.anim.slide_out_left
-            )
-        )
+            ),
+            currentFragment,
+            nextFragment)
     }
 
 }

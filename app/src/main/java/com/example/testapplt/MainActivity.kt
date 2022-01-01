@@ -3,13 +3,13 @@ package com.example.testapplt
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.testapplt.ui.common.CustomNavigator
-import com.example.testapplt.ui.screen.SearchBooksScreen
+import com.example.testapplt.ui.screen.Screens.searchBooksScreen
+import com.github.terrakok.cicerone.Command
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.Replace
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
-import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.Router
-import ru.terrakok.cicerone.commands.Command
-import ru.terrakok.cicerone.commands.Replace
 import javax.inject.Inject
 
 @FlowPreview
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         if (savedInstanceState == null) {
-            navigator.applyCommands(arrayOf<Command>(Replace(SearchBooksScreen("None"))))
+            navigator.applyCommands(arrayOf<Command>(Replace(searchBooksScreen())))
         }
     }
 

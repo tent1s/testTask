@@ -1,10 +1,11 @@
 package com.example.testapplt.ui.screen.filters
 
 import androidx.lifecycle.ViewModel
-import com.example.testapplt.ui.screen.SearchBooksScreen
+import com.example.testapplt.ui.screen.books.RESULT_KEY
+import com.example.testapplt.ui.screen.books.SearchType
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
-import ru.terrakok.cicerone.Router
 import javax.inject.Inject
 
 @HiltViewModel
@@ -13,7 +14,12 @@ class SearchFiltersViewModel @Inject constructor(
 ): ViewModel() {
 
     @FlowPreview
-    fun returnToBooksScreen(){
-        router.backTo(SearchBooksScreen("None"))
+    fun sendNewType(searchType: SearchType){
+        router.sendResult(RESULT_KEY, searchType)
+        router.exit()
+    }
+
+    fun onBackClicked(){
+        router.exit()
     }
 }
