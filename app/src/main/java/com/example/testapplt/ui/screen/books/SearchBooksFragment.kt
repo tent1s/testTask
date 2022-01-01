@@ -30,7 +30,14 @@ import com.example.testapplt.ui.adapter.BooksListDataItem
 class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
 
     companion object {
-        fun newInstance() = SearchBooksFragment()
+        private const val EXTRA_NAME = "tcf_extra_name"
+
+        fun getNewInstance(name: String?) =
+            SearchBooksFragment().apply {
+                arguments = Bundle().apply {
+                    putString(EXTRA_NAME, name)
+                }
+            }
     }
 
     private val binding: FragmentSearchBooksBinding by viewBinding()
@@ -120,7 +127,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
         }
 
         binding.searchBooksToolbar.searchBooksToolbarFilterAppCompatImageButton.setOnClickListener {
-
+            viewModel.navigateToFilters()
         }
 
 

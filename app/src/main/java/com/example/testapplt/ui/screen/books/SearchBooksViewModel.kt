@@ -5,16 +5,19 @@ import androidx.lifecycle.viewModelScope
 import com.example.testapplt.domain.model.ErrorReason
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.domain.usecases.ListOfBooksUseCase
+import com.example.testapplt.ui.screen.SearchFiltersScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import ru.terrakok.cicerone.Router
 import timber.log.Timber
 import javax.inject.Inject
 
 @FlowPreview
 @HiltViewModel
 class SearchBooksViewModel @Inject constructor(
-    private val listOfBooksUseCase: ListOfBooksUseCase
+    private val listOfBooksUseCase: ListOfBooksUseCase,
+    private val router : Router
 ): ViewModel() {
 
     private var getBooksRequest: Job? = null
@@ -136,6 +139,10 @@ class SearchBooksViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    fun navigateToFilters(){
+        router.navigateTo(SearchFiltersScreen("None"))
     }
 
 }
