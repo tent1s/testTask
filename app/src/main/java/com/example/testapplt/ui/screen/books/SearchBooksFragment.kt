@@ -24,6 +24,8 @@ import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.ui.adapter.BooksListDataItem
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.random.Random
 
 @FlowPreview
@@ -73,6 +75,13 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.liveSearch
+                    .debounce { state->
+                        if (state.length != 1)
+                            700
+                        else
+                            0
+                    }
+                    .distinctUntilChanged()
                     .collectLatest { parameter ->
                         viewModel.startSearch(parameter)
                     }

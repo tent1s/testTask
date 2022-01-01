@@ -26,9 +26,10 @@ class SearchBooksViewModel @Inject constructor(
     val bookList: StateFlow<BooksListState> = mutableBookList.asStateFlow()
 
     private val mutableLiveSearch = MutableSharedFlow<String>()
-    val liveSearch = mutableLiveSearch.asSharedFlow().debounce(700).distinctUntilChanged()
+    val liveSearch = mutableLiveSearch.asSharedFlow()
 
     private var isLoadingNextBooks = false
+    private var isTextFiledEmpty = true
 
 
     sealed class BooksListState {
@@ -48,9 +49,12 @@ class SearchBooksViewModel @Inject constructor(
         when{
             parameter.isBlank() -> viewModelScope.launch {
                 mutableBookList.emit(BooksListState.Empty)
+                getBooksRequest?.cancel()
+                isTextFiledEmpty = true
             }
             else -> viewModelScope.launch {
                 mutableLiveSearch.emit(parameter)
+                isTextFiledEmpty = false
             }
         }
     }
@@ -62,7 +66,7 @@ class SearchBooksViewModel @Inject constructor(
 
 
     fun getBooksByParameter(parameter: String){
-        if (parameter.isBlank()) return
+        if (parameter.isBlank() || isTextFiledEmpty) return
         getBooksRequest?.cancel()
         getBooksRequest = viewModelScope.launch {
             listOfBooksUseCase.getBooks(parameter).process(
