@@ -35,12 +35,10 @@ class FilterView @JvmOverloads constructor(
 
     private fun showChoseState() {
         filterViewCheckImageView.show()
-        isSelected = true
     }
 
     private fun showBaseState() {
         filterViewCheckImageView.hide()
-        isSelected = false
     }
 
 }

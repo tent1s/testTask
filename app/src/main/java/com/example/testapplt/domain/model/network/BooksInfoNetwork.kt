@@ -20,7 +20,7 @@ class ItemsInfo(
 @JsonClass(generateAdapter = true)
 class VolumeInfo(
     @Json(name = "title")
-    val title : String,
+    val title : String?,
     @Json(name = "authors")
     val authors : List<String>?,
     @Json(name = "imageLinks")

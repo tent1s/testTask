@@ -21,7 +21,7 @@ class SearchBooksViewModel @Inject constructor(
 ): ViewModel() {
 
     companion object{
-        private const val COUNT_ITEMS_FROM_BACKAND = 10
+        private const val COUNT_ITEMS_FROM_BACKAND = 20
     }
 
     private var getBooksRequest: Job? = null
@@ -67,55 +67,59 @@ class SearchBooksViewModel @Inject constructor(
     }
 
 
-    fun startSearch(parameter: String){
-        getBooksByParameter(parameter)
-    }
-
-
     fun getBooksByParameter(parameter: String){
         if (parameter.isBlank() || textFieldContent.isBlank()) return
         getBooksRequest?.cancel()
         getBooksRequest = viewModelScope.launch {
-            listOfBooksUseCase.getBooks(searchType.value.typeSignature, parameter).process(
+            listOfBooksUseCase.getBooks(searchType.value.typeSignature,
+                parameter,
+                COUNT_ITEMS_FROM_BACKAND).process(
                 {
-                    when(it){
-                        is ErrorReason.NetworkError -> launch {
-                            mutableBookList.emit(BooksListState.NoConnection)
-                        }
-                        else -> launch {
-                            mutableBookList.emit(BooksListState.Error(it))
-                        }
-                    }
+                    setRequestErrorState(it)
                 },
                 {
-                    it?.let { notNull ->
-                        if (notNull.size < COUNT_ITEMS_FROM_BACKAND) {
-                            launch {
-                                mutableBookList.emit(BooksListState.BooksListSuccess(notNull, false))
-                            }
-                        }else{
-                            launch {
-                                mutableBookList.emit(BooksListState.BooksListSuccess(notNull, true))
+                    launch {
+                        it?.let { notNull ->
+                            if (notNull.size < COUNT_ITEMS_FROM_BACKAND) {
+                                mutableBookList.emit(
+                                    BooksListState.BooksListSuccess(
+                                        notNull,
+                                        false
+                                    )
+                                )
+                            } else {
+                                mutableBookList.emit(
+                                    BooksListState.BooksListSuccess(
+                                        notNull,
+                                        true
+                                    )
+                                )
                             }
                         }
-                    }
-                    if (it.isNullOrEmpty()){
-                        launch {
+                        if (it.isNullOrEmpty()) {
                             mutableBookList.emit(BooksListState.Empty)
                         }
                     }
-
                 }
             )
         }
     }
 
+    private fun setRequestErrorState(errorReason: ErrorReason) {
+        viewModelScope.launch {
+            when (errorReason) {
+                is ErrorReason.NetworkError -> mutableBookList.emit(BooksListState.NoConnection)
+                else -> mutableBookList.emit(BooksListState.Error(errorReason))
+            }
+        }
+    }
+
     fun validateLoadMoreBook(parameter: String){
         when{
-            parameter.isBlank() -> return
-            isLoadingNextBooks -> return
+            parameter.isBlank() || isLoadingNextBooks -> return
             bookList.value is BooksListState.BooksListSuccess -> {
                 isLoadingNextBooks = true
+
                 val currentList = (bookList.value as BooksListState.BooksListSuccess)
                     .booksInfo
                     .toMutableList()
@@ -123,35 +127,40 @@ class SearchBooksViewModel @Inject constructor(
                 getMoreBooks(parameter, currentList)
             }
         }
-
     }
 
     private fun getMoreBooks(parameter: String, currentList: MutableList<BooksInfo>){
-
-
         getBooksRequest = viewModelScope.launch {
-            listOfBooksUseCase.getBooks(searchType.value.typeSignature, parameter, currentList.size).process(
+            listOfBooksUseCase.getBooks(searchType.value.typeSignature,
+                parameter,
+                COUNT_ITEMS_FROM_BACKAND,
+                currentList.size).process(
                 {
-                    when(it){
-                        is ErrorReason.NetworkError -> launch {
-                            mutableBookList.emit(BooksListState.NoConnection)
-                        }
-                        else -> launch {
-                            mutableBookList.emit(BooksListState.Error(it))
-                        }
-                    }
+                    setRequestErrorState(it)
                 },
                 {
-                    it?.let {
-                        launch {
+                    launch {
+                        it?.let {
                             currentList.addAll(it)
-                            mutableBookList.emit(BooksListState.BooksListSuccess(
-                                ArrayList(LinkedHashSet(currentList)), // we must do it, because the backend has a bug, it sends duplicates
-                                it.isNotEmpty()
-                            ))
-                        }
-                    } ?: run {
-                        launch {
+                            val listWithOutDuplicates =
+                                ArrayList(LinkedHashSet(currentList)) // we must do it, because the backend has a bug, it sends duplicates
+
+                            if (listWithOutDuplicates.size == currentList.size - it.size) {
+                                mutableBookList.emit(
+                                    BooksListState.BooksListSuccess(
+                                        listWithOutDuplicates,
+                                        false
+                                    )
+                                )
+                            } else {
+                                mutableBookList.emit(
+                                    BooksListState.BooksListSuccess(
+                                        listWithOutDuplicates,
+                                        it.isNotEmpty()
+                                    )
+                                )
+                            }
+                        } ?: run {
                             mutableBookList.emit(
                                 BooksListState.BooksListSuccess(
                                     ArrayList(LinkedHashSet(currentList)), // we must do it, because the backend has a bug, it sends duplicates
@@ -159,9 +168,9 @@ class SearchBooksViewModel @Inject constructor(
                                 )
                             )
                         }
+                        isLoadingNextBooks = false
+                        Timber.i("Loaded more books")
                     }
-                    isLoadingNextBooks = false
-                    Timber.i("Loaded more books")
                 }
             )
         }

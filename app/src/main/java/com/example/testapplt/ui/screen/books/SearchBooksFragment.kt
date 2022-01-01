@@ -40,11 +40,12 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
 
     private val viewModel: SearchBooksViewModel by viewModels()
 
-    private var adapter = BooksListAdapter()
+    private var adapter : BooksListAdapter? = null
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        adapter = BooksListAdapter()
         initToolbar()
         initRecyclerView()
     }
@@ -76,7 +77,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
                     }
                     .distinctUntilChanged()
                     .collectLatest { parameter ->
-                        viewModel.startSearch(parameter)
+                        viewModel.getBooksByParameter(parameter)
                     }
             }
         }
@@ -96,25 +97,26 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
 
 
     private fun showNoConnectionState(){
-        adapter.submitList(arrayListOf())
+        adapter?.submitList(arrayListOf())
         binding.searchBooksNotAvailableTextView.hide()
         binding.searchBooksNoConnectionImageView.show()
     }
 
     private fun showEmptyState(){
-        adapter.submitList(arrayListOf())
+        adapter?.submitList(arrayListOf())
         binding.searchBooksNotAvailableTextView.show()
         binding.searchBooksNoConnectionImageView.hide()
     }
 
     private fun showSuccessState(booksInfo: List<BooksInfo>, showLoader: Boolean) {
-        if (showLoader)
-            adapter.submitList(
+        if (showLoader) {
+            adapter?.submitList(
                 booksInfo.map { BooksListDataItem.BooksInfoItem(it) } +
                         listOf(BooksListDataItem.Loader(Random.nextLong().toString()))
             )
-        else
-            adapter.submitList( booksInfo.map { BooksListDataItem.BooksInfoItem(it) } )
+        } else {
+            adapter?.submitList(booksInfo.map { BooksListDataItem.BooksInfoItem(it) })
+        }
 
         binding.searchBooksNotAvailableTextView.hide()
         binding.searchBooksNoConnectionImageView.hide()
@@ -126,7 +128,6 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
     }
 
 
-
     private fun initToolbar(){
         with(binding.searchBooksToolbar.searchBooksToolbarEditText) {
             setOnEditorActionListener { _, action, _ ->
@@ -135,20 +136,21 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
                         binding.searchBooksToolbar.searchBooksToolbarEditText.text.toString()
                     )
                     true
-                }else
+                } else {
                     false
+                }
             }
 
             addTextChangedListener {
                 viewModel.textFieldBeChanged(it.toString())
             }
+
             hint = getString(R.string.search)
         }
 
         binding.searchBooksToolbar.searchBooksToolbarFilterAppCompatImageButton.setOnClickListener {
             viewModel.navigateToFilters()
         }
-
 
     }
 
