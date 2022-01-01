@@ -22,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.RecyclerView
 
 @FlowPreview
 @AndroidEntryPoint
@@ -50,7 +51,9 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
         with(binding.searchBooksToolbar.searchBooksToolbarEditText) {
             setOnEditorActionListener { _, action, _ ->
                 if (action == EditorInfo.IME_ACTION_SEARCH) {
-                    performSearch()
+                    viewModel.getBooksByParameter(
+                        binding.searchBooksToolbar.searchBooksToolbarEditText.text.toString()
+                    )
                     true
                 }else
                     false
@@ -59,6 +62,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
             addTextChangedListener {
                 viewModel.textFieldBeChanged(it.toString())
             }
+            hint = getString(R.string.search)
         }
 
         binding.searchBooksToolbar.searchBooksToolbarFilterAppCompatImageButton.setOnClickListener {
@@ -76,35 +80,45 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
 
     }
 
-    private fun performSearch(){
-        viewModel.getBooksByParameter(binding.searchBooksToolbar.searchBooksToolbarEditText.text.toString())
-    }
-
 
     private fun initRecyclerView(){
-        binding.searchBooksRecyclerView.adapter = adapter
-        binding.searchBooksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.bookList
-                    .collect { books ->
-                        when (books) {
-                            is SearchBooksViewModel.BooksListState.BooksListSuccess -> {
-                                adapter.submitList(books.booksInfo)
-                                binding.searchBooksNotAvailableTextView.hide()
-                            }
-                            is SearchBooksViewModel.BooksListState.Error -> {
-                                requireContext().showToast(books.errorReason.message)
-                                viewModel.setEmptyState()
-                            }
-                            SearchBooksViewModel.BooksListState.Empty -> {
-                                adapter.submitList(arrayListOf())
-                                binding.searchBooksNotAvailableTextView.show()
+        with(binding.searchBooksRecyclerView) {
+            adapter = this@SearchBooksFragment.adapter
+            layoutManager = LinearLayoutManager(requireContext())
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.bookList
+                        .collect { books ->
+                            when (books) {
+                                is SearchBooksViewModel.BooksListState.BooksListSuccess -> {
+                                    this@SearchBooksFragment.adapter.submitList(books.booksInfo)
+                                    binding.searchBooksNotAvailableTextView.hide()
+                                }
+                                is SearchBooksViewModel.BooksListState.Error -> {
+                                    requireContext().showToast(books.errorReason.message)
+                                    viewModel.setEmptyState()
+                                }
+                                SearchBooksViewModel.BooksListState.Empty -> {
+                                    this@SearchBooksFragment.adapter.submitList(arrayListOf())
+                                    binding.searchBooksNotAvailableTextView.show()
+                                }
                             }
                         }
-                    }
+                }
             }
+
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (!recyclerView.canScrollVertically(1)) {
+                       viewModel.validateLoadMoreBook(
+                           binding.searchBooksToolbar.searchBooksToolbarEditText.text.toString()
+                       )
+                    }
+                }
+            })
         }
+
     }
 
 }

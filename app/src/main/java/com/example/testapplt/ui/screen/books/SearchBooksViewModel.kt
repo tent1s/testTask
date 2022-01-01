@@ -10,6 +10,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @FlowPreview
@@ -25,6 +26,8 @@ class SearchBooksViewModel @Inject constructor(
 
     private val mutableLiveSearch = MutableStateFlow("")
     val liveSearch: Flow<String> = mutableLiveSearch.debounce(700).distinctUntilChanged()
+
+    private var isLoadingNextBooks = false
 
 
     sealed class BooksListState {
@@ -74,6 +77,46 @@ class SearchBooksViewModel @Inject constructor(
                         }
                     }
 
+                }
+            )
+        }
+    }
+
+    fun validateLoadMoreBook(parameter: String){
+        when{
+            parameter.isBlank() -> return
+            isLoadingNextBooks -> return
+            bookList.value is BooksListState.BooksListSuccess -> {
+                isLoadingNextBooks = true
+                val currentList = (bookList.value as BooksListState.BooksListSuccess)
+                    .booksInfo
+                    .toMutableList()
+
+                getMoreBooks(parameter, currentList)
+            }
+        }
+
+    }
+
+    private fun getMoreBooks(parameter: String, currentList: MutableList<BooksInfo>){
+
+
+        getBooksRequest = viewModelScope.launch {
+            listOfBooksUseCase.getBooks(parameter, currentList.size).process(
+                {
+                    launch {
+                        mutableBookList.emit(BooksListState.Error(it))
+                    }
+                },
+                {
+                    it?.let {
+                        launch {
+                            currentList.addAll(it)
+                            mutableBookList.emit(BooksListState.BooksListSuccess(currentList))
+                        }
+                    }
+                    isLoadingNextBooks = false
+                    Timber.i("Loaded more books")
                 }
             )
         }

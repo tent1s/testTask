@@ -12,8 +12,8 @@ class GoogleBookRepositoryImp @Inject constructor(
     private val googleBookApi: GoogleBookApi
     ): GoogleBookRepository {
 
-    override suspend fun getBooks(parameter: String) : Either<ErrorReason, List<BooksInfo>?> =
-        googleBookApi.getBooks(parameter).map {
+    override suspend fun getBooks(parameter: String, startIndex: Int) : Either<ErrorReason, List<BooksInfo>?> =
+        googleBookApi.getBooks(parameter, startIndex).map {
             it.items?.map(BooksInfoMapper::map)
         }
 
