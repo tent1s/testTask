@@ -1,6 +1,7 @@
 package com.example.testapplt.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -10,19 +11,55 @@ import com.example.testapplt.R
 import com.example.testapplt.databinding.ItemBookBinding
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.ui.utils.load
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
-class BooksListAdapter : ListAdapter<BooksInfo,
-        BooksListAdapter.ViewHolder>(BooksInfoDiffCallback()) {
+class BooksListAdapter : ListAdapter<BooksListDataItem,
+        RecyclerView.ViewHolder>(BooksInfoDiffCallback()) {
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = getItem(position)
-
-        holder.bind(item)
+    companion object{
+        private const val ITEM_VIEW_TYPE_LOADER = 0
+        private const val ITEM_VIEW_TYPE_ITEM = 1
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder.from(parent)
+    private val adapterScope = CoroutineScope(Dispatchers.Default)
+
+    fun addLoaderAndSubmitList(list: List<BooksInfo>) {
+        adapterScope.launch {
+            val items =
+                 list.map { BooksListDataItem.BooksInfoItem(it) } + listOf(BooksListDataItem.Loader)
+
+            withContext(Dispatchers.Main) {
+                submitList(items)
+            }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is BooksListDataItem.Loader -> ITEM_VIEW_TYPE_LOADER
+            is BooksListDataItem.BooksInfoItem -> ITEM_VIEW_TYPE_ITEM
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is ViewHolder -> {
+                val item = getItem(position) as BooksListDataItem.BooksInfoItem
+                holder.bind( item.booksInfo)
+            }
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            ITEM_VIEW_TYPE_LOADER -> LoaderHolder.from(parent)
+            ITEM_VIEW_TYPE_ITEM -> ViewHolder.from(parent)
+            else -> throw ClassCastException("Unknown viewType $viewType")
+        }
     }
 
     class ViewHolder private constructor(private val binding: ItemBookBinding)
@@ -54,15 +91,38 @@ class BooksListAdapter : ListAdapter<BooksInfo,
             }
         }
     }
+
+    class LoaderHolder(view: View): RecyclerView.ViewHolder(view) {
+        companion object {
+            fun from(parent: ViewGroup): LoaderHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val view = layoutInflater.inflate(R.layout.item_loader, parent, false)
+                return LoaderHolder(view)
+            }
+        }
+    }
 }
 
 
-class BooksInfoDiffCallback : DiffUtil.ItemCallback<BooksInfo>() {
-    override fun areItemsTheSame(oldItem: BooksInfo, newItem: BooksInfo): Boolean {
+class BooksInfoDiffCallback : DiffUtil.ItemCallback<BooksListDataItem>() {
+    override fun areItemsTheSame(oldItem: BooksListDataItem, newItem: BooksListDataItem): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: BooksInfo, newItem: BooksInfo): Boolean {
+    override fun areContentsTheSame(oldItem: BooksListDataItem, newItem: BooksListDataItem): Boolean {
         return oldItem == newItem
     }
+}
+
+
+sealed class BooksListDataItem {
+    data class BooksInfoItem(val booksInfo: BooksInfo): BooksListDataItem() {
+        override val id = booksInfo.id
+    }
+
+    object Loader: BooksListDataItem() {
+        override val id = Long.MIN_VALUE.toString()
+    }
+
+    abstract val id: String
 }

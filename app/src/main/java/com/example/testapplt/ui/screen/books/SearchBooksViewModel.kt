@@ -6,10 +6,8 @@ import com.example.testapplt.domain.model.ErrorReason
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.domain.usecases.ListOfBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -24,8 +22,8 @@ class SearchBooksViewModel @Inject constructor(
     private val mutableBookList = MutableStateFlow<BooksListState>(BooksListState.Empty)
     val bookList: StateFlow<BooksListState> = mutableBookList.asStateFlow()
 
-    private val mutableLiveSearch = MutableStateFlow("")
-    val liveSearch: Flow<String> = mutableLiveSearch.debounce(700).distinctUntilChanged()
+    private val mutableLiveSearch = MutableSharedFlow<String>()
+    val liveSearch = mutableLiveSearch.asSharedFlow().debounce(700).distinctUntilChanged()
 
     private var isLoadingNextBooks = false
 
@@ -43,10 +41,14 @@ class SearchBooksViewModel @Inject constructor(
     }
 
     fun textFieldBeChanged(parameter: String){
-        if (parameter.isNotBlank())
-            viewModelScope.launch {
+        when{
+            parameter.isBlank() -> viewModelScope.launch {
+                mutableBookList.emit(BooksListState.Empty)
+            }
+            else -> viewModelScope.launch {
                 mutableLiveSearch.emit(parameter)
             }
+        }
     }
 
 

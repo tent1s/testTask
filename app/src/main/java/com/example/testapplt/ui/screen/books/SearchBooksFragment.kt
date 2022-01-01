@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
 
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.testapplt.R
@@ -45,6 +44,40 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
         initRecyclerView()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.bookList
+                    .collect { books ->
+                        when (books) {
+                            is SearchBooksViewModel.BooksListState.BooksListSuccess -> {
+                                adapter.addLoaderAndSubmitList(books.booksInfo)
+                                binding.searchBooksNotAvailableTextView.hide()
+                            }
+                            is SearchBooksViewModel.BooksListState.Error -> {
+                                requireContext().showToast(books.errorReason.message)
+                                viewModel.setEmptyState()
+                            }
+                            SearchBooksViewModel.BooksListState.Empty -> {
+                                adapter.submitList(arrayListOf())
+                                binding.searchBooksNotAvailableTextView.show()
+                            }
+                        }
+                    }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.liveSearch
+                    .collectLatest { parameter ->
+                        viewModel.startSearch(parameter)
+                    }
+            }
+        }
+    }
+
 
 
     private fun initToolbar(){
@@ -69,14 +102,6 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
 
         }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.liveSearch
-                    .collectLatest { parameter ->
-                        viewModel.startSearch(parameter)
-                    }
-            }
-        }
 
     }
 
@@ -84,28 +109,6 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
     private fun initRecyclerView(){
         with(binding.searchBooksRecyclerView) {
             adapter = this@SearchBooksFragment.adapter
-            layoutManager = LinearLayoutManager(requireContext())
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    viewModel.bookList
-                        .collect { books ->
-                            when (books) {
-                                is SearchBooksViewModel.BooksListState.BooksListSuccess -> {
-                                    this@SearchBooksFragment.adapter.submitList(books.booksInfo)
-                                    binding.searchBooksNotAvailableTextView.hide()
-                                }
-                                is SearchBooksViewModel.BooksListState.Error -> {
-                                    requireContext().showToast(books.errorReason.message)
-                                    viewModel.setEmptyState()
-                                }
-                                SearchBooksViewModel.BooksListState.Empty -> {
-                                    this@SearchBooksFragment.adapter.submitList(arrayListOf())
-                                    binding.searchBooksNotAvailableTextView.show()
-                                }
-                            }
-                        }
-                }
-            }
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
