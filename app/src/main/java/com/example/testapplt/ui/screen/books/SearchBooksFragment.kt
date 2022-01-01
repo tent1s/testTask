@@ -22,6 +22,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
+import com.example.testapplt.ui.adapter.BooksListDataItem
 
 @FlowPreview
 @AndroidEntryPoint
@@ -52,7 +53,10 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
                     .collect { books ->
                         when (books) {
                             is SearchBooksViewModel.BooksListState.BooksListSuccess -> {
-                                adapter.addLoaderAndSubmitList(books.booksInfo)
+                                adapter.submitList(
+                                    books.booksInfo.map { BooksListDataItem.BooksInfoItem(it) } +
+                                            listOf(BooksListDataItem.Loader)
+                                )
                                 binding.searchBooksNotAvailableTextView.hide()
                             }
                             is SearchBooksViewModel.BooksListState.Error -> {

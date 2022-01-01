@@ -25,19 +25,6 @@ class BooksListAdapter : ListAdapter<BooksListDataItem,
         private const val ITEM_VIEW_TYPE_ITEM = 1
     }
 
-    private val adapterScope = CoroutineScope(Dispatchers.Default)
-
-    fun addLoaderAndSubmitList(list: List<BooksInfo>) {
-        adapterScope.launch {
-            val items =
-                 list.map { BooksListDataItem.BooksInfoItem(it) } + listOf(BooksListDataItem.Loader)
-
-            withContext(Dispatchers.Main) {
-                submitList(items)
-            }
-        }
-    }
-
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is BooksListDataItem.Loader -> ITEM_VIEW_TYPE_LOADER
