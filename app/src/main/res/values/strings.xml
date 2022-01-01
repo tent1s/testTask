@@ -3,4 +3,10 @@
     <string name="search">Поиск</string>
     <string name="bookWillBeFind">Нужная книга всегда найдётся</string>
     <string name="filtersTittle">Параметры поиска</string>
+    <string name="searchParamsTittle">Уточните параметры, по которым искать книги</string>
+    <string name="searchForAll">Поиск по всему</string>
+    <string name="searchForAuthor">Поиск по автору</string>
+    <string name="searchForName">Поиск по названию</string>
+    <string name="searchForSubject">Поиск по жанру</string>
+    <string name="searchForPublisher">Поиск по издателю</string>
 </resources>

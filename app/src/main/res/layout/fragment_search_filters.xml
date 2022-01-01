@@ -16,14 +16,65 @@
         style="@style/Widget.MaterialComponents.Toolbar.Primary"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button"
+    <TextView
+        android:id="@+id/searchFiltersTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="16sp"
+        android:textColor="@color/textDark"
+        android:text="@string/searchParamsTittle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchFiltersMaterialToolbar" />
+
+    <com.example.testapplt.ui.view.FilterView
+        android:id="@+id/allSearchFiltersFilterView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchFiltersTextView"
+        app:text="@string/searchForAll" />
+
+    <com.example.testapplt.ui.view.FilterView
+        android:id="@+id/authorSearchFiltersFilterView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/allSearchFiltersFilterView"
+        app:text="@string/searchForAuthor" />
+
+    <com.example.testapplt.ui.view.FilterView
+        android:id="@+id/NameSearchFiltersFilterView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/authorSearchFiltersFilterView"
+        app:text="@string/searchForName" />
+
+    <com.example.testapplt.ui.view.FilterView
+        android:id="@+id/SubjectSearchFiltersFilterView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/NameSearchFiltersFilterView"
+        app:text="@string/searchForSubject" />
+
+    <com.example.testapplt.ui.view.FilterView
+        android:id="@+id/PublisherSearchFiltersFilterView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/SubjectSearchFiltersFilterView"
+        app:text="@string/searchForPublisher" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
