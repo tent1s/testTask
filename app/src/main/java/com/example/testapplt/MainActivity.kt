@@ -8,6 +8,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.Router
+import ru.terrakok.cicerone.commands.Command
+import ru.terrakok.cicerone.commands.Replace
 import javax.inject.Inject
 
 @FlowPreview
@@ -27,7 +29,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        router.replaceScreen( SearchBooksScreen("None") )
+        if (savedInstanceState == null) {
+            navigator.applyCommands(arrayOf<Command>(Replace(SearchBooksScreen("None"))))
+        }
     }
 
     override fun onResumeFragments() {
