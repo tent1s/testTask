@@ -22,6 +22,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
+import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.ui.adapter.BooksListDataItem
 
 @FlowPreview
@@ -52,21 +53,10 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
                 viewModel.bookList
                     .collect { books ->
                         when (books) {
-                            is SearchBooksViewModel.BooksListState.BooksListSuccess -> {
-                                adapter.submitList(
-                                    books.booksInfo.map { BooksListDataItem.BooksInfoItem(it) } +
-                                            listOf(BooksListDataItem.Loader)
-                                )
-                                binding.searchBooksNotAvailableTextView.hide()
-                            }
-                            is SearchBooksViewModel.BooksListState.Error -> {
-                                requireContext().showToast(books.errorReason.message)
-                                viewModel.setEmptyState()
-                            }
-                            SearchBooksViewModel.BooksListState.Empty -> {
-                                adapter.submitList(arrayListOf())
-                                binding.searchBooksNotAvailableTextView.show()
-                            }
+                            is SearchBooksViewModel.BooksListState.BooksListSuccess -> showSuccessState(books.booksInfo)
+                            is SearchBooksViewModel.BooksListState.Error -> showErrorState(books.errorReason.message)
+                            SearchBooksViewModel.BooksListState.Empty -> showEmptyState()
+                            SearchBooksViewModel.BooksListState.NoConnection -> showNoConnectionState()
                         }
                     }
             }
@@ -80,6 +70,33 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
                     }
             }
         }
+    }
+
+
+    private fun showNoConnectionState(){
+        adapter.submitList(arrayListOf())
+        binding.searchBooksNotAvailableTextView.hide()
+        binding.searchBooksNoConnectionImageView.show()
+    }
+
+    private fun showEmptyState(){
+        adapter.submitList(arrayListOf())
+        binding.searchBooksNotAvailableTextView.show()
+        binding.searchBooksNoConnectionImageView.hide()
+    }
+
+    private fun showSuccessState(booksInfo: List<BooksInfo>) {
+        adapter.submitList(
+            booksInfo.map { BooksListDataItem.BooksInfoItem(it) } +
+                    listOf(BooksListDataItem.Loader)
+        )
+        binding.searchBooksNotAvailableTextView.hide()
+        binding.searchBooksNoConnectionImageView.hide()
+    }
+
+    private fun showErrorState(message: String) {
+        requireContext().showToast(message)
+        viewModel.setEmptyState()
     }
 
 

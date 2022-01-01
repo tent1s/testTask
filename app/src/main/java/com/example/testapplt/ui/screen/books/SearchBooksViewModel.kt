@@ -30,6 +30,7 @@ class SearchBooksViewModel @Inject constructor(
 
     sealed class BooksListState {
         object Empty : BooksListState()
+        object NoConnection : BooksListState()
         class Error(val errorReason: ErrorReason) : BooksListState()
         class BooksListSuccess(val booksInfo: List<BooksInfo>) : BooksListState()
     }
@@ -63,8 +64,13 @@ class SearchBooksViewModel @Inject constructor(
         getBooksRequest = viewModelScope.launch {
             listOfBooksUseCase.getBooks(parameter).process(
                 {
-                    launch {
-                        mutableBookList.emit(BooksListState.Error(it))
+                    when(it){
+                        is ErrorReason.NetworkError -> launch {
+                            mutableBookList.emit(BooksListState.NoConnection)
+                        }
+                        else -> launch {
+                            mutableBookList.emit(BooksListState.Error(it))
+                        }
                     }
                 },
                 {
