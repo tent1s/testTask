@@ -112,15 +112,23 @@ class SearchBooksViewModel @Inject constructor(
         getBooksRequest = viewModelScope.launch {
             listOfBooksUseCase.getBooks(parameter, currentList.size).process(
                 {
-                    launch {
-                        mutableBookList.emit(BooksListState.Error(it))
+                    when(it){
+                        is ErrorReason.NetworkError -> launch {
+                            mutableBookList.emit(BooksListState.NoConnection)
+                        }
+                        else -> launch {
+                            mutableBookList.emit(BooksListState.Error(it))
+                        }
                     }
                 },
                 {
                     it?.let {
                         launch {
                             currentList.addAll(it)
-                            mutableBookList.emit(BooksListState.BooksListSuccess(currentList))
+                            mutableBookList.emit(BooksListState.BooksListSuccess(
+                                ArrayList(LinkedHashSet(currentList))       // we must do it, because the backend has a bug, it sends duplicates
+                            ))
+
                         }
                     }
                     isLoadingNextBooks = false
