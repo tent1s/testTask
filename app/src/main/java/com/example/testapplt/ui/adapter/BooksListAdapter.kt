@@ -107,8 +107,8 @@ sealed class BooksListDataItem {
         override val id = booksInfo.id
     }
 
-    object Loader: BooksListDataItem() {
-        override val id = Long.MIN_VALUE.toString()
+    data class Loader(val newId: String): BooksListDataItem() {
+        override val id = newId
     }
 
     abstract val id: String

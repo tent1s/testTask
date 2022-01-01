@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.ui.adapter.BooksListDataItem
+import kotlin.random.Random
 
 @FlowPreview
 @AndroidEntryPoint
@@ -95,7 +96,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books){
     private fun showSuccessState(booksInfo: List<BooksInfo>) {
         adapter.submitList(
             booksInfo.map { BooksListDataItem.BooksInfoItem(it) } +
-                    listOf(BooksListDataItem.Loader)
+                    listOf(BooksListDataItem.Loader(Random.nextLong().toString()))
         )
         binding.searchBooksNotAvailableTextView.hide()
         binding.searchBooksNoConnectionImageView.hide()
