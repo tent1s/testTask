@@ -13,7 +13,7 @@ class SearchFiltersViewModel @Inject constructor(
     private val router : Router
 ): ViewModel() {
 
-    @FlowPreview
+
     fun sendNewType(searchType: SearchType){
         router.sendResult(RESULT_KEY, searchType)
         router.exit()

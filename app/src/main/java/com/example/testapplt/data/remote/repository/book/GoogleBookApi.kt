@@ -10,9 +10,9 @@ interface GoogleBookApi {
 
     @GET("v1/volumes")
     suspend fun getBooks(
-        @Query("q") parameter : String,
-        @Query("maxResults") maxResults : Int,
-        @Query("startIndex") startIndex : Int,
+        @Query("q") parameter: String,
+        @Query("maxResults") maxResults: Int,
+        @Query("startIndex") startIndex: Int,
     ): Either<ErrorReason, BooksInfoNetwork>
 
 }

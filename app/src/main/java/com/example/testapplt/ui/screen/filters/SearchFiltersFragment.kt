@@ -12,7 +12,7 @@ import com.example.testapplt.ui.screen.books.SearchType
 import com.example.testapplt.ui.view.FilterView
 import kotlinx.coroutines.FlowPreview
 
-@FlowPreview
+
 @AndroidEntryPoint
 class SearchFiltersFragment : Fragment(R.layout.fragment_search_filters){
 

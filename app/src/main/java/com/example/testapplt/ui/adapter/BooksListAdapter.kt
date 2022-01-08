@@ -1,58 +1,33 @@
 package com.example.testapplt.ui.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.testapplt.R
 import com.example.testapplt.databinding.ItemBookBinding
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.ui.utils.load
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
-class BooksListAdapter : ListAdapter<BooksListDataItem,
-        RecyclerView.ViewHolder>(BooksInfoDiffCallback()) {
+class BooksListAdapter : PagingDataAdapter<BooksInfo,
+        BooksListAdapter.ViewHolder>(BooksInfoDiffCallback()) {
 
-    companion object{
-        private const val ITEM_VIEW_TYPE_LOADER = 0
-        private const val ITEM_VIEW_TYPE_ITEM = 1
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = getItem(position)
+
+        item?.let { holder.bind(it) }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return when (getItem(position)) {
-            is BooksListDataItem.Loader -> ITEM_VIEW_TYPE_LOADER
-            is BooksListDataItem.BooksInfoItem -> ITEM_VIEW_TYPE_ITEM
-        }
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder.from(parent)
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is ViewHolder -> {
-                val item = getItem(position) as BooksListDataItem.BooksInfoItem
-                holder.bind( item.booksInfo)
-            }
-        }
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            ITEM_VIEW_TYPE_LOADER -> LoaderHolder.from(parent)
-            ITEM_VIEW_TYPE_ITEM -> ViewHolder.from(parent)
-            else -> throw ClassCastException("Unknown viewType $viewType")
-        }
-    }
+    class ViewHolder private constructor(private val binding: ItemBookBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
-    class ViewHolder private constructor(private val binding: ItemBookBinding)
-        : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind( item: BooksInfo) {
+        fun bind(item: BooksInfo) {
             binding.itemBookMainTextView.text = item.tittle
             binding.itemBookDescriptionTextView.text = item.authors
             with(binding.itemBookImageView) {
@@ -79,37 +54,14 @@ class BooksListAdapter : ListAdapter<BooksListDataItem,
         }
     }
 
-    class LoaderHolder(view: View): RecyclerView.ViewHolder(view) {
-        companion object {
-            fun from(parent: ViewGroup): LoaderHolder {
-                val layoutInflater = LayoutInflater.from(parent.context)
-                val view = layoutInflater.inflate(R.layout.item_loader, parent, false)
-                return LoaderHolder(view)
-            }
+
+    class BooksInfoDiffCallback : DiffUtil.ItemCallback<BooksInfo>() {
+        override fun areItemsTheSame(oldItem: BooksInfo, newItem: BooksInfo): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: BooksInfo, newItem: BooksInfo): Boolean {
+            return oldItem == newItem
         }
     }
-}
-
-
-class BooksInfoDiffCallback : DiffUtil.ItemCallback<BooksListDataItem>() {
-    override fun areItemsTheSame(oldItem: BooksListDataItem, newItem: BooksListDataItem): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: BooksListDataItem, newItem: BooksListDataItem): Boolean {
-        return oldItem == newItem
-    }
-}
-
-
-sealed class BooksListDataItem {
-    data class BooksInfoItem(val booksInfo: BooksInfo): BooksListDataItem() {
-        override val id = booksInfo.id
-    }
-
-    data class Loader(val newId: String): BooksListDataItem() {
-        override val id = newId
-    }
-
-    abstract val id: String
 }

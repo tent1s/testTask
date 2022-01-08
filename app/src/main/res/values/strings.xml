@@ -9,4 +9,6 @@
     <string name="searchForName">Поиск по названию</string>
     <string name="searchForSubject">Поиск по жанру</string>
     <string name="searchForPublisher">Поиск по издателю</string>
+    <string name="retry">Повторить</string>
+    <string name="notLoaded">Не удалось загрузить</string>
 </resources>

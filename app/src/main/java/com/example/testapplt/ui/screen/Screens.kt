@@ -9,7 +9,7 @@ import kotlinx.coroutines.FlowPreview
 
 
 
-@FlowPreview
+
 object Screens {
     fun searchFiltersScreen(filter: SearchType) = FragmentScreen {
         SearchFiltersFragment.getNewInstance(filter)

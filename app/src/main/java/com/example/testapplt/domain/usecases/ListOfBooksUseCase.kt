@@ -1,15 +1,14 @@
 package com.example.testapplt.domain.usecases
 
-import com.example.testapplt.domain.model.Either
-import com.example.testapplt.domain.model.ErrorReason
+import androidx.paging.PagingData
 import com.example.testapplt.domain.model.domain.BooksInfo
 import com.example.testapplt.domain.repository.GoogleBookRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ListOfBooksUseCase @Inject constructor(
-    private val googleBookRepository: GoogleBookRepository)
-{
-
-    suspend fun getBooks(searchParam: String, parameter: String,maxResults: Int, startIndex: Int = 0): Either<ErrorReason, List<BooksInfo>?> =
-        googleBookRepository.getBooks(searchParam, parameter, maxResults, startIndex)
+    private val googleBookRepository: GoogleBookRepository
+) {
+    suspend fun getBooksFlow(searchParam: String, filter: String): Flow<PagingData<BooksInfo>> =
+        googleBookRepository.getBooksFlow(searchParam, filter).flow
 }

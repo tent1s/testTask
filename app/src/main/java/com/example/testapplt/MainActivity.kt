@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
-@FlowPreview
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
