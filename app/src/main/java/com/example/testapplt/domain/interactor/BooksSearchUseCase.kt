@@ -1,7 +1,7 @@
-package com.example.testapplt.domain.usecases
+package com.example.testapplt.domain.interactor
 
 import androidx.paging.PagingData
-import com.example.testapplt.domain.model.domain.BooksInfo
+import com.example.testapplt.domain.model.BooksInfo
 import com.example.testapplt.domain.repository.GoogleBookRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

@@ -1,6 +1,6 @@
 package com.example.testapplt.data.dataModule
 
-import com.example.testapplt.data.remote.repository.book.GoogleBookRepositoryImp
+import com.example.testapplt.data.remote.book.repository.GoogleBookRepositoryImp
 import com.example.testapplt.domain.repository.GoogleBookRepository
 import dagger.Binds
 import dagger.Module

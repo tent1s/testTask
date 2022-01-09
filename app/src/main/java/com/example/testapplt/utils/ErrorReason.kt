@@ -1,8 +1,8 @@
-package com.example.testapplt.domain.model
+package com.example.testapplt.utils
 
 import com.squareup.moshi.JsonClass
 
-sealed class ErrorReason : ReadableError  {
+sealed class ErrorReason : ReadableError {
     abstract override val message: String
 
     @JsonClass(generateAdapter = true)
@@ -23,11 +23,11 @@ sealed class ErrorReason : ReadableError  {
     }
 
     data class NetworkError(val throwable: Throwable) : ErrorReason() {
-        override val message: String =  throwable.localizedMessage
+        override val message: String = throwable.localizedMessage
     }
 
     data class UnexpectedError(val exception: Exception) : ErrorReason() {
-        override val message: String =  exception.localizedMessage
+        override val message: String = exception.localizedMessage
     }
 }
 

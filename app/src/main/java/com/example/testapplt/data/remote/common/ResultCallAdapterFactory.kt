@@ -1,6 +1,8 @@
-package com.example.testapplt.domain.model
+package com.example.testapplt.data.remote.common
 
 import android.annotation.SuppressLint
+import com.example.testapplt.utils.ErrorReason
+import com.example.testapplt.utils.Either
 import okhttp3.ResponseBody
 import retrofit2.*
 import timber.log.Timber

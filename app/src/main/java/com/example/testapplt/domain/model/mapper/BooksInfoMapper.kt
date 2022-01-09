@@ -1,13 +1,12 @@
-package com.example.testapplt.domain.model.domain.mapper
+package com.example.testapplt.domain.model.mapper
 
 import android.net.Uri
 import android.text.TextUtils.join
-import com.example.testapplt.domain.model.domain.BooksInfo
-import com.example.testapplt.domain.model.network.BooksInfoNetwork
-import com.example.testapplt.domain.model.network.ItemsInfo
+import com.example.testapplt.domain.model.BooksInfo
+import com.example.testapplt.data.remote.book.entity.ItemsInfo
 
 object BooksInfoMapper {
-    fun map(data: ItemsInfo) : BooksInfo =
+    fun map(data: ItemsInfo): BooksInfo =
         BooksInfo(
             id = data.id,
             tittle = data.volumeInfo.title,

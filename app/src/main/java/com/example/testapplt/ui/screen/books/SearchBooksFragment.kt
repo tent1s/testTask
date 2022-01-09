@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.example.testapplt.LOADING_GOOGLE_BOOKS_PAGE_SIZE
 import com.example.testapplt.R
 import com.example.testapplt.databinding.FragmentSearchBooksBinding
 import com.example.testapplt.ui.adapter.BooksListAdapter
@@ -20,10 +21,8 @@ import com.example.testapplt.ui.adapter.BooksListLoadStateAdapter
 import com.example.testapplt.ui.utils.hide
 import com.example.testapplt.ui.utils.show
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import com.example.testapplt.ui.utils.hideKeyboard
-import kotlinx.coroutines.flow.*
 
 
 @AndroidEntryPoint
@@ -31,8 +30,6 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
 
     companion object {
         fun getNewInstance() = SearchBooksFragment()
-
-        private const val LOADING_PAGE_SIZE = 20
     }
 
     private val binding: FragmentSearchBooksBinding by viewBinding()
@@ -47,7 +44,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
 
         lifecycleScope.launchWhenStarted {
             adapter?.onPagesUpdatedFlow?.collect {
-                if (adapter?.itemCount == LOADING_PAGE_SIZE) {
+                if (adapter?.itemCount == LOADING_GOOGLE_BOOKS_PAGE_SIZE) {
                     binding.searchBooksRecyclerView.layoutManager?.scrollToPosition(0)
                 }
             }

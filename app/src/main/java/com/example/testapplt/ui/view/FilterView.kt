@@ -32,7 +32,6 @@ class FilterView @JvmOverloads constructor(
     }
 
 
-
     private fun showChoseState() {
         filterViewCheckImageView.show()
     }

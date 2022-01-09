@@ -1,11 +1,12 @@
-package com.example.testapplt.data.models.paging
+package com.example.testapplt.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.example.testapplt.data.remote.repository.book.GoogleBookApi
-import com.example.testapplt.domain.model.Either
-import com.example.testapplt.domain.model.domain.BooksInfo
-import com.example.testapplt.domain.model.domain.mapper.BooksInfoMapper
+import com.example.testapplt.LOADING_GOOGLE_BOOKS_PAGE_SIZE
+import com.example.testapplt.data.remote.book.repository.GoogleBookApi
+import com.example.testapplt.domain.model.BooksInfo
+import com.example.testapplt.domain.model.mapper.BooksInfoMapper
+import com.example.testapplt.utils.Either
 
 class BooksPagingSource(
     private val googleBookApi: GoogleBookApi,
@@ -14,13 +15,12 @@ class BooksPagingSource(
 
     companion object {
         private const val BOOKS_STARTING_PAGE_INDEX = 0
-        private const val LOADING_PAGE_SIZE = 20
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, BooksInfo> {
         val page = params.key ?: BOOKS_STARTING_PAGE_INDEX
         return when (val response =
-            googleBookApi.getBooks(query, LOADING_PAGE_SIZE, LOADING_PAGE_SIZE * page)) {
+            googleBookApi.getBooks(query, LOADING_GOOGLE_BOOKS_PAGE_SIZE, LOADING_GOOGLE_BOOKS_PAGE_SIZE * page)) {
             is Either.Failure -> LoadResult.Error(RuntimeException(response.error.message))
             is Either.Success -> {
                 val books = response.data.items?.map(BooksInfoMapper::map) ?: run { listOf() }

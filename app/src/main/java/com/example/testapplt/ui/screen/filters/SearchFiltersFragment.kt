@@ -10,11 +10,10 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.testapplt.databinding.FragmentSearchFiltersBinding
 import com.example.testapplt.ui.screen.books.SearchType
 import com.example.testapplt.ui.view.FilterView
-import kotlinx.coroutines.FlowPreview
 
 
 @AndroidEntryPoint
-class SearchFiltersFragment : Fragment(R.layout.fragment_search_filters){
+class SearchFiltersFragment : Fragment(R.layout.fragment_search_filters) {
 
     companion object {
         private const val SEARCH_TYPE = "SearchType"
@@ -48,12 +47,12 @@ class SearchFiltersFragment : Fragment(R.layout.fragment_search_filters){
             viewModel.onBackClicked()
         }
 
-        filterViewToSearchType.forEach { viewToSearchType ->
-            if (arguments?.getParcelable<SearchType>(SEARCH_TYPE) == viewToSearchType.second)
-                viewToSearchType.first.isActive = true
+        filterViewToSearchType.forEach { (view, searchType) ->
+            if (arguments?.getParcelable<SearchType>(SEARCH_TYPE) == searchType)
+                view.isActive = true
             else
-                viewToSearchType.first.setOnClickListener {
-                    viewModel.sendNewType(viewToSearchType.second)
+                view.setOnClickListener {
+                    viewModel.sendNewSearchType(searchType)
                 }
         }
     }

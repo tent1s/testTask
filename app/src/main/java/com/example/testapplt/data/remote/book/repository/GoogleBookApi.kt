@@ -1,8 +1,8 @@
-package com.example.testapplt.data.remote.repository.book
+package com.example.testapplt.data.remote.book.repository
 
-import com.example.testapplt.domain.model.Either
-import com.example.testapplt.domain.model.ErrorReason
-import com.example.testapplt.domain.model.network.BooksInfoNetwork
+import com.example.testapplt.utils.ErrorReason
+import com.example.testapplt.data.remote.book.entity.BooksInfoNetwork
+import com.example.testapplt.utils.Either
 import retrofit2.http.GET
 import retrofit2.http.Query
 

@@ -2,18 +2,16 @@ package com.example.testapplt.ui.common
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.example.testapplt.MainActivity
+import com.example.testapplt.ui.MainActivity
 import com.example.testapplt.R
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.github.terrakok.cicerone.androidx.FragmentScreen
-import kotlinx.coroutines.FlowPreview
-
 
 
 class CustomNavigator(
     activity: MainActivity,
     containerID: Int
-): AppNavigator(activity, containerID) {
+) : AppNavigator(activity, containerID) {
 
 
     override fun setupFragmentTransaction(
@@ -31,7 +29,8 @@ class CustomNavigator(
                 R.anim.slide_out_left
             ),
             currentFragment,
-            nextFragment)
+            nextFragment
+        )
     }
 
 }

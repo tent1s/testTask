@@ -1,10 +1,10 @@
-package com.example.testapplt.domain.model.network
+package com.example.testapplt.data.remote.book.entity
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-class BooksInfoNetwork (
+class BooksInfoNetwork(
     @Json(name = "items")
     val items: List<ItemsInfo>?,
 )
@@ -12,23 +12,23 @@ class BooksInfoNetwork (
 @JsonClass(generateAdapter = true)
 class ItemsInfo(
     @Json(name = "id")
-    val id : String,
+    val id: String,
     @Json(name = "volumeInfo")
-    val volumeInfo : VolumeInfo,
+    val volumeInfo: VolumeInfo,
 )
 
 @JsonClass(generateAdapter = true)
 class VolumeInfo(
     @Json(name = "title")
-    val title : String?,
+    val title: String?,
     @Json(name = "authors")
-    val authors : List<String>?,
+    val authors: List<String>?,
     @Json(name = "imageLinks")
-    val imageLinks : ImageLinks?
+    val imageLinks: ImageLinks?
 )
 
 @JsonClass(generateAdapter = true)
 class ImageLinks(
     @Json(name = "thumbnail")
-    val thumbnail : String
+    val thumbnail: String
 )

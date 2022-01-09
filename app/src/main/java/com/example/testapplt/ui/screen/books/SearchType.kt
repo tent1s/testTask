@@ -5,7 +5,6 @@ import androidx.annotation.Keep
 import kotlinx.android.parcel.Parcelize
 
 
-const val RESULT_KEY = "resultKey"
 
 @Parcelize
 @Keep

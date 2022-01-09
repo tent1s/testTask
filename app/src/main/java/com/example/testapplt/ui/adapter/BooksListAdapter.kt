@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.testapplt.R
 import com.example.testapplt.databinding.ItemBookBinding
-import com.example.testapplt.domain.model.domain.BooksInfo
+import com.example.testapplt.domain.model.BooksInfo
 import com.example.testapplt.ui.utils.load
 
 

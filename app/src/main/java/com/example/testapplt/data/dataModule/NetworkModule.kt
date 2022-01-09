@@ -1,8 +1,8 @@
 package com.example.testapplt.data.dataModule
 
 import com.example.testapplt.BuildConfig
-import com.example.testapplt.data.remote.repository.book.GoogleBookApi
-import com.example.testapplt.domain.model.ResultCallAdapterFactory
+import com.example.testapplt.data.remote.book.repository.GoogleBookApi
+import com.example.testapplt.data.remote.common.ResultCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -54,6 +54,5 @@ class NetworkModule {
     fun provideGoogleBookApi(
         retrofit: Retrofit
     ): GoogleBookApi = retrofit.create(GoogleBookApi::class.java)
-
 
 }

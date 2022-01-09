@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.testapplt.domain.model.domain.BooksInfo
-import com.example.testapplt.domain.usecases.BooksSearchUseCase
+import com.example.testapplt.NAVIGATION_RESULT_KEY
+import com.example.testapplt.domain.model.BooksInfo
+import com.example.testapplt.domain.interactor.BooksSearchUseCase
 import com.example.testapplt.ui.screen.Screens.searchFiltersScreen
 import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,14 +15,13 @@ import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 
-
 @HiltViewModel
 class SearchBooksViewModel @Inject constructor(
-    private val listOfBooksUseCase: BooksSearchUseCase,
+    private val booksSearchUseCase: BooksSearchUseCase,
     private val router: Router
 ) : ViewModel() {
 
-    companion object{
+    companion object {
         private const val ONE_SYMBOL = 1
     }
 
@@ -40,10 +40,11 @@ class SearchBooksViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            listOfBooksUseCase.getSearchChange()
+            booksSearchUseCase.getSearchChange()
                 .cachedIn(viewModelScope)
                 .onEach { result ->
-                    mutableBookListState.value = BooksListState.BooksListSuccess(result)
+                    if (textFieldContent.isNotBlank())
+                        mutableBookListState.value = BooksListState.BooksListSuccess(result)
                 }.launchIn(viewModelScope)
         }
     }
@@ -65,7 +66,7 @@ class SearchBooksViewModel @Inject constructor(
 
 
     fun navigateToFilters() {
-        router.setResultListener(RESULT_KEY) { data ->
+        router.setResultListener(NAVIGATION_RESULT_KEY) { data ->
             viewModelScope.launch {
                 mutableSearchTypeState.emit(data as SearchType)
             }
@@ -76,7 +77,7 @@ class SearchBooksViewModel @Inject constructor(
 
     private fun onBooksSubmit(query: String, isInstantSearch: Boolean) {
         viewModelScope.launch {
-            listOfBooksUseCase.onBooksSubmit(
+            booksSearchUseCase.onBooksSubmit(
                 convertTextEditQueryToSearchFormat(query),
                 isInstantSearch
             )
@@ -84,7 +85,8 @@ class SearchBooksViewModel @Inject constructor(
     }
 
 
-    private fun convertTextEditQueryToSearchFormat(query: String) = "${searchTypeState.value}$query"
+    private fun convertTextEditQueryToSearchFormat(query: String) =
+        "${searchTypeState.value.typeSignature}$query"
 
 
 }
