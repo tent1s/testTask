@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.testapplt.domain.model.domain.BooksInfo
-import com.example.testapplt.domain.usecases.ListOfBooksUseCase
+import com.example.testapplt.domain.usecases.BooksSearchUseCase
 import com.example.testapplt.ui.screen.Screens.searchFiltersScreen
 import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,18 +14,19 @@ import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 
+
 @HiltViewModel
 class SearchBooksViewModel @Inject constructor(
-    private val listOfBooksUseCase: ListOfBooksUseCase,
+    private val listOfBooksUseCase: BooksSearchUseCase,
     private val router: Router
 ) : ViewModel() {
 
+    companion object{
+        private const val ONE_SYMBOL = 1
+    }
 
     private val mutableBookListState = MutableStateFlow<BooksListState>(BooksListState.Empty)
     val bookListState: StateFlow<BooksListState> = mutableBookListState.asStateFlow()
-
-    private val mutableLiveSearch = MutableSharedFlow<Pair<String, Boolean>>()
-    val liveSearch = mutableLiveSearch.asSharedFlow()
 
     private var textFieldContent = ""
 
@@ -37,21 +38,9 @@ class SearchBooksViewModel @Inject constructor(
         class BooksListSuccess(val booksInfo: PagingData<BooksInfo>) : BooksListState()
     }
 
-    fun textFieldBeChanged(parameter: String, isInstant: Boolean) {
+    init {
         viewModelScope.launch {
-            textFieldContent = parameter
-            when {
-                parameter.isBlank() -> mutableBookListState.emit(BooksListState.Empty)
-                else -> {
-                    mutableLiveSearch.emit(Pair(parameter, isInstant))
-                }
-            }
-        }
-    }
-
-    fun searchPhotos(query: String) {
-        viewModelScope.launch {
-            listOfBooksUseCase.getBooksFlow(query, searchTypeState.value.typeSignature)
+            listOfBooksUseCase.getSearchChange()
                 .cachedIn(viewModelScope)
                 .onEach { result ->
                     mutableBookListState.value = BooksListState.BooksListSuccess(result)
@@ -59,14 +48,43 @@ class SearchBooksViewModel @Inject constructor(
         }
     }
 
+    fun validateQueryForSearchBooks(query: String, isInstantSearch: Boolean) {
+        viewModelScope.launch {
+            textFieldContent = query
+            when {
+                query.isBlank() -> mutableBookListState.emit(BooksListState.Empty)
+                else -> {
+                    onBooksSubmit(
+                        query,
+                        query.length == ONE_SYMBOL || isInstantSearch
+                    )
+                }
+            }
+        }
+    }
+
+
     fun navigateToFilters() {
         router.setResultListener(RESULT_KEY) { data ->
             viewModelScope.launch {
                 mutableSearchTypeState.emit(data as SearchType)
             }
-            searchPhotos(textFieldContent)
+            validateQueryForSearchBooks(textFieldContent, isInstantSearch = true)
         }
         router.navigateTo(searchFiltersScreen(searchTypeState.value))
     }
+
+    private fun onBooksSubmit(query: String, isInstantSearch: Boolean) {
+        viewModelScope.launch {
+            listOfBooksUseCase.onBooksSubmit(
+                convertTextEditQueryToSearchFormat(query),
+                isInstantSearch
+            )
+        }
+    }
+
+
+    private fun convertTextEditQueryToSearchFormat(query: String) = "${searchTypeState.value}$query"
+
 
 }

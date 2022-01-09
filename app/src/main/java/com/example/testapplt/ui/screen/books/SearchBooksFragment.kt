@@ -21,11 +21,9 @@ import com.example.testapplt.ui.utils.hide
 import com.example.testapplt.ui.utils.show
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.example.testapplt.ui.utils.hideKeyboard
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.*
 
 
 @AndroidEntryPoint
@@ -34,10 +32,7 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
     companion object {
         fun getNewInstance() = SearchBooksFragment()
 
-        private const val ONE_SYMBOL = 1
-        private const val INSTANT_SEARCH = 0L
-        private const val DELAYED_SEARCH = 700L
-        private const val PAGE_SIZE = 10
+        private const val LOADING_PAGE_SIZE = 20
     }
 
     private val binding: FragmentSearchBooksBinding by viewBinding()
@@ -47,14 +42,12 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
     private var adapter: BooksListAdapter? = null
 
 
-    @FlowPreview
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         lifecycleScope.launchWhenStarted {
             adapter?.onPagesUpdatedFlow?.collect {
-                if (adapter?.itemCount == PAGE_SIZE) {
+                if (adapter?.itemCount == LOADING_PAGE_SIZE) {
                     binding.searchBooksRecyclerView.layoutManager?.scrollToPosition(0)
                 }
             }
@@ -80,21 +73,6 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
             }
         }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.liveSearch
-                    .debounce { (searchParam, isInstant) ->
-                        when {
-                            searchParam.length == ONE_SYMBOL || isInstant -> INSTANT_SEARCH
-                            else -> DELAYED_SEARCH
-                        }
-                    }
-                    .distinctUntilChanged()
-                    .collectLatest { (searchParam, _) ->
-                        viewModel.searchPhotos(searchParam)
-                    }
-            }
-        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -124,9 +102,9 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
             setOnEditorActionListener { _, action, _ ->
                 when {
                     (action == EditorInfo.IME_ACTION_SEARCH) -> {
-                        viewModel.textFieldBeChanged(
+                        viewModel.validateQueryForSearchBooks(
                             text.toString(),
-                            true
+                            isInstantSearch = true
                         )
                         requireActivity().hideKeyboard()
                         true
@@ -136,9 +114,9 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
             }
 
             addTextChangedListener {
-                viewModel.textFieldBeChanged(
+                viewModel.validateQueryForSearchBooks(
                     it.toString(),
-                    false
+                    isInstantSearch = false
                 )
             }
 

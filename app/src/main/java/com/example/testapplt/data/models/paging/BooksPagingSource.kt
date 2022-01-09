@@ -14,13 +14,13 @@ class BooksPagingSource(
 
     companion object {
         private const val BOOKS_STARTING_PAGE_INDEX = 0
-        private const val LOAD_SIZE = 10
+        private const val LOADING_PAGE_SIZE = 20
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, BooksInfo> {
         val page = params.key ?: BOOKS_STARTING_PAGE_INDEX
         return when (val response =
-            googleBookApi.getBooks(query, LOAD_SIZE, LOAD_SIZE * page)) {
+            googleBookApi.getBooks(query, LOADING_PAGE_SIZE, LOADING_PAGE_SIZE * page)) {
             is Either.Failure -> LoadResult.Error(RuntimeException(response.error.message))
             is Either.Success -> {
                 val books = response.data.items?.map(BooksInfoMapper::map) ?: run { listOf() }
