@@ -7,9 +7,6 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -18,11 +15,13 @@ import com.example.testapplt.R
 import com.example.testapplt.databinding.FragmentSearchBooksBinding
 import com.example.testapplt.ui.adapter.BooksListAdapter
 import com.example.testapplt.ui.adapter.BooksListLoadStateAdapter
+import com.example.testapplt.ui.utils.launchWhenStart
 import com.example.testapplt.ui.utils.hide
 import com.example.testapplt.ui.utils.show
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import com.example.testapplt.ui.utils.hideKeyboard
+import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 
 
 @AndroidEntryPoint
@@ -41,49 +40,38 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        adapter = BooksListAdapter()
+        adapter?.onPagesUpdatedFlow?.onEach {
+            if (adapter?.itemCount == LOADING_GOOGLE_BOOKS_PAGE_SIZE) {
+                binding.searchBooksRecyclerView.layoutManager?.scrollToPosition(0)
+            }
+        }?.launchWhenStart(lifecycle)
 
-        lifecycleScope.launchWhenStarted {
-            adapter?.onPagesUpdatedFlow?.collect {
-                if (adapter?.itemCount == LOADING_GOOGLE_BOOKS_PAGE_SIZE) {
-                    binding.searchBooksRecyclerView.layoutManager?.scrollToPosition(0)
+        viewModel.bookListState
+            .onEach { books ->
+                when (books) {
+                    is SearchBooksViewModel.BooksListState.BooksListSuccess ->
+                        adapter?.submitData(
+                            viewLifecycleOwner.lifecycle,
+                            books.booksInfo
+                        )
+                    SearchBooksViewModel.BooksListState.Empty ->
+                        adapter?.submitData(
+                            lifecycle,
+                            PagingData.empty()
+                        )
                 }
-            }
-        }
+            }.launchWhenStart(lifecycle)
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.bookListState
-                    .collect { books ->
-                        when (books) {
-                            is SearchBooksViewModel.BooksListState.BooksListSuccess ->
-                                adapter?.submitData(
-                                    viewLifecycleOwner.lifecycle,
-                                    books.booksInfo
-                                )
-                            SearchBooksViewModel.BooksListState.Empty ->
-                                adapter?.submitData(
-                                    lifecycle,
-                                    PagingData.empty()
-                                )
-                        }
-                    }
-            }
-        }
-
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.searchTypeState
-                    .collect { searchType ->
-                        when (searchType) {
-                            SearchType.ALL ->
-                                binding.searchBooksToolbar.searchBooksToolbarFilterActiveView.hide()
-                            else ->
-                                binding.searchBooksToolbar.searchBooksToolbarFilterActiveView.show()
-                        }
-                    }
-            }
-        }
+        viewModel.searchTypeState
+            .onEach { searchType ->
+                when (searchType) {
+                    SearchType.ALL ->
+                        binding.searchBooksToolbar.searchBooksToolbarFilterActiveView.hide()
+                    else ->
+                        binding.searchBooksToolbar.searchBooksToolbarFilterActiveView.show()
+                }
+            }.launchWhenStart(lifecycle)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -128,8 +116,6 @@ class SearchBooksFragment : Fragment(R.layout.fragment_search_books) {
 
     private fun initRecyclerView() {
         with(binding) {
-
-            adapter = BooksListAdapter()
 
             searchBooksRecyclerView.adapter = adapter?.withLoadStateHeaderAndFooter(
                 header = BooksListLoadStateAdapter { adapter?.retry() },
